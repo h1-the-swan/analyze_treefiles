@@ -6,9 +6,9 @@ import numpy as np
 
 import logging
 logging.basicConfig(format='%(asctime)s %(name)s.%(lineno)d %(levelname)s : %(message)s',
-        datefmt="%H:%M:%S",
-        level=logging.INFO)
-logger = logging.getLogger(__name__)
+        datefmt="%H:%M:%S")
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger('__main__').getChild(__name__)
 
 def extract_subgraph_and_get_lines_for_pajek(fname_pjk, paper_ids):
     """Write a new pajek (.net) file for just a given set of paper ids
@@ -125,37 +125,51 @@ def get_linenumbers(fname_linenumbers):
     linenumbers.index = linenumbers.index.astype('str')
     return linenumbers
 
-def main(args):
+def write_subgraph_to_pajek(linenums_fname, 
+                            cluster_name, 
+                            tree_fname, 
+                            input_pajek, 
+                            output_fname):
     start = time.clock()
     logger.debug('getting map of cluster_id to linenumber in the tree file...')
-    linenumbers = get_linenumbers(args.linenums_fname)
+    linenumbers = get_linenumbers(linenums_fname)
     logger.debug('done. took {:.1f} s'.format(time.clock()-start))
 
     start = time.clock()
-    logger.debug('getting line number for cluster {}...'.format(args.cluster_name))
-    cl_linenumber = get_linenumber_for_cluster(linenumbers, args.cluster_name)
+    logger.debug('getting line number for cluster {}...'.format(cluster_name))
+    cl_linenumber = get_linenumber_for_cluster(linenumbers, cluster_name)
     logger.debug('done. took {:.1f} s'.format(time.clock()-start))
     logger.debug('linenumber: {}'.format(cl_linenumber))
 
     start = time.clock()
-    logger.debug('getting paper ids from treefile {}...'.format(args.tree_fname))
-    paper_ids = get_paper_ids_for_cluster(args.tree_fname, args.cluster_name, cl_linenumber)
+    logger.debug('getting paper ids from treefile {}...'.format(tree_fname))
+    paper_ids = get_paper_ids_for_cluster(tree_fname, cluster_name, cl_linenumber)
     logger.debug('done. took {:.1f} s'.format(time.clock()-start))
     logger.debug('found {} paper ids.'.format(len(paper_ids)))
 
     start = time.clock()
-    logger.debug('extracting subgraph from input pajek file {}...'.format(args.input_pajek))
-    lines = extract_subgraph_and_get_lines_for_pajek(args.input_pajek, paper_ids)
+    logger.debug('extracting subgraph from input pajek file {}...'.format(input_pajek))
+    lines = extract_subgraph_and_get_lines_for_pajek(input_pajek, paper_ids)
     logger.debug('done. took {:.1f} s'.format(time.clock()-start))
 
     start = time.clock()
-    logger.debug('writing to file {}...'.format(args.output_fname))
-    write_pajek(lines, args.output_fname)
+    logger.debug('writing to file {}...'.format(output_fname))
+    write_pajek(lines, output_fname)
     logger.debug('done. took {:.1f} s'.format(time.clock()-start))
+
+
+def main(args):
+    write_subgraph_to_pajek(args.linenums_fname, 
+                            args.cluster_name, 
+                            args.tree_fname, 
+                            args.input_pajek,
+                            args.output_fname)
+
     
 
 if __name__ == "__main__":
     total_start = time.time()
+    logger.setLevel(logging.INFO)
     logger.info(" ".join(sys.argv))
     logger.info( '{:%Y-%m-%d %H:%M:%S}'.format(datetime.now()) )
     import argparse
