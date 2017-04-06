@@ -28,6 +28,8 @@ def extract_subgraph_and_get_lines_for_pajek(fname_pjk, paper_ids):
     with open(fname_pjk, 'r') as f:
         i = 0
         mode = ''
+        new_idx = 0
+        old_new_idx_dict = {}
         for line in f:
             if line[0] == '*':
                 if line[1].lower() == 'v':  # this should happen on the very first line
@@ -42,8 +44,12 @@ def extract_subgraph_and_get_lines_for_pajek(fname_pjk, paper_ids):
                 paper_index = items[0]
                 paper_id = items[1].strip('"')
                 if paper_id in paper_ids:
+                    new_idx += 1  # we want the new idx to start at 1
                     paper_indices.append(paper_index)
-                    lines['vertices'].append(line)
+                    old_new_idx_dict[paper_index] = new_idx
+                    output_line = ' '.join([new_idx] + items[1:])
+                    output_line = output_line + '\n'
+                    lines['vertices'].append(output_line)
             elif mode == 'e':
                 # edges
                 items = line.strip().split(' ')
@@ -52,7 +58,10 @@ def extract_subgraph_and_get_lines_for_pajek(fname_pjk, paper_ids):
                 if citing_index in paper_indices:
                     cited_index = items[1]
                     if cited_index in paper_indices:
-                        lines['edges'].append(line)
+                        citing_index_new = old_new_idx_dict[citing_index]
+                        cited_index_new = old_new_idx_dict[cited_index]
+                        output_line = ' '.join([str(citing_index_new), str(cited_index_new)])
+                        lines['edges'].append(output_line)
             i += 1
     return lines
 
@@ -70,6 +79,7 @@ def write_pajek(lines, outfname):
         num_vertices = len(lines['vertices'])
         logger.debug('writing {} vertices...'.format(num_vertices))
         outf.write('*vertices {}\n'.format(num_vertices))
+        i = 0
         for line in lines['vertices']:
             outf.write(line)
 
