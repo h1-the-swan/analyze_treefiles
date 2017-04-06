@@ -47,7 +47,7 @@ def extract_subgraph_and_get_lines_for_pajek(fname_pjk, paper_ids):
                     new_idx += 1  # we want the new idx to start at 1
                     paper_indices.append(paper_index)
                     old_new_idx_dict[paper_index] = new_idx
-                    output_line = ' '.join([new_idx] + items[1:])
+                    output_line = ' '.join([str(new_idx)] + items[1:])
                     output_line = output_line + '\n'
                     lines['vertices'].append(output_line)
             elif mode == 'e':
@@ -61,6 +61,7 @@ def extract_subgraph_and_get_lines_for_pajek(fname_pjk, paper_ids):
                         citing_index_new = old_new_idx_dict[citing_index]
                         cited_index_new = old_new_idx_dict[cited_index]
                         output_line = ' '.join([str(citing_index_new), str(cited_index_new)])
+                        output_line = output_line + '\n'
                         lines['edges'].append(output_line)
             i += 1
     return lines
