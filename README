@@ -1,1 +1,9 @@
 exploratory analyses of tree files---networks clustered using Infomap and related algorithms
+
+RelaxMap clustering was performed on the Thompson Reuter's Web of Science article citation network
+Successful (~5.5 hours) on PNNL's big memory (2 TB) machine, parallelized over 80 CPUs
+
+RelaxMap gives a two-level partition.
+Some of these were further partitioned using hierarchical Infomap on the PNNL cluster (not bigmem).
+Except for the largest RelaxMap cluster, which repeatedly failed on PNNL's cluster.
+2017-04-21: Successfully partitioned the largest RelaxMap cluster using hierarchical Infomap on Hyak Mox's big memory node (~3 days)
