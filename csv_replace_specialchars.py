@@ -43,25 +43,25 @@ def parse_and_replace(input_filename, output_filename,
             if escape is False and char == '\\':
                 escape = True
             else:
-                escape = False
-                if char == '"':
-                    # # if the last character was a backslash, this is an escaped quotation mark and should be ignored
-                    # if last_char != '\\':
-                    in_quote = not in_quote  # toggle
-                    if in_quote:
-                        fields_this_row += 1
+                if escape is False:
+                    if char == '"':
+                        in_quote = not in_quote  # toggle
+                        if in_quote:
+                            fields_this_row += 1
 
-                if char in special:
-                    if in_quote:
-                        # we have encountered a special character within a data field.
-                        # replace it
-                        char = replace_map[char]
-                    else:
-                        if char == '\n':
-                            # new line
-                            line_num += 1
-                            fields_this_row = 0
-                            current_line_offset = offset
+                    if char in special:
+                        if in_quote:
+                            # we have encountered a special character within a data field.
+                            # replace it
+                            char = replace_map[char]
+                        else:
+                            if char == '\n':
+                                # new line
+                                line_num += 1
+                                fields_this_row = 0
+                                current_line_offset = offset
+                else:
+                    escape = False
             # write this character to file
             outf.write(char)
             last_char = char  # store last character for next time thru the loop
